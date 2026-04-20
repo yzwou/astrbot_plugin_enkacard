@@ -40,7 +40,7 @@ async def role_list_img(uid: str):
 
     # 设置 Jinja2 环境
     env = Environment(
-        loader=FileSystemLoader("."),
+        loader=FileSystemLoader(script_dir),
         trim_blocks=True,
         lstrip_blocks=True
     )
@@ -57,20 +57,18 @@ async def role_list_img(uid: str):
 
     # 输出到文件
     file_name = f'screen_role_list/{uid}_{local_time.tm_year}{local_time.tm_mon}{local_time.tm_mday}_{time.strftime("%H%M%S")}'
-    with open(f'{file_name}.html', "w", encoding="utf-8") as f:
+    html_file_path = os.path.join(script_dir, f'{file_name}.html')
+    
+    # 确保目录存在
+    os.makedirs(os.path.dirname(html_file_path), exist_ok=True)
+    
+    with open(html_file_path, "w", encoding="utf-8") as f:
         f.write(output)
 
-    # 获取当前脚本所在目录的绝对路径，以生成 HTML 文件的绝对路径（兼容 Docker 环境）
-    abs_html_path = os.path.join(script_dir, f'{file_name}.html')
-    print(f'HTML文件绝对路径: {abs_html_path}')
+    print(f'HTML文件绝对路径: {html_file_path}')
 
-    return abs_html_path
-
-
-    """使用 Playwright 渲染 html 页面，等待图片加载完成"""
-    # 获取当前脚本所在目录的绝对路径
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    html_path = os.path.join(script_dir, f'{file_name}.html')
+    # 使用 Playwright 渲染 html 页面，等待图片加载完成
+    html_path = html_file_path
 
     # 转换为 file:// URL
     file_url = f'file://{html_path.replace(os.sep, "/")}'
