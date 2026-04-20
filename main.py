@@ -38,8 +38,7 @@ class MyPlugin(Star):
             try:
                 role_list_img_path = await role_list_img(uid)
                 logger.info(f"图片生成成功 | {role_list_img_path}")
-                yield event.plain_result(role_list_img_path)
-                # yield event.image_result(role_list_img_path)
+                yield event.image_result(role_list_img_path)
             except ValueError as e:
                 # 捕获查询失败的错误
                 logger.error(f"角色列表生成失败 | UID: {uid} | 错误: {str(e)}")

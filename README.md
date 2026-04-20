@@ -1,5 +1,7 @@
 # AstrBot 原神角色卡片插件
 
+#####TODO playwright install#####
+
 一个用于 AstrBot 的插件，可以从 [enka.network](https://enka.network/) 获取原神玩家的角色信息并生成角色卡片图片。
 
 ## 功能特性
