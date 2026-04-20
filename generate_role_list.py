@@ -15,11 +15,13 @@ async def role_list_img(uid: str):
 
     :return 图片路径 角色信息
     """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     local_time = time.localtime()
     chars = await list_roles_dict(uid)
 
     # 加载 .genshincharacters.json 构建映射
-    with open(".genshincharacters.json", "r", encoding="utf-8") as f:
+    json_path = os.path.join(script_dir, "genshincharacters.json")
+    with open(json_path, "r", encoding="utf-8") as f:
         char_data = json.load(f)
 
     # 构建 id -> SideIconName 映射
@@ -59,7 +61,6 @@ async def role_list_img(uid: str):
         f.write(output)
 
     # 获取当前脚本所在目录的绝对路径，以生成 HTML 文件的绝对路径（兼容 Docker 环境）
-    script_dir = os.path.dirname(os.path.abspath(__file__))
     abs_html_path = os.path.join(script_dir, f'{file_name}.html')
     print(f'HTML文件绝对路径: {abs_html_path}')
 
