@@ -36,9 +36,14 @@ class MyPlugin(Star):
 
         if character_index is None:
             try:
-                role_list_img_path = await role_list_img(uid)
-                logger.info(f"图片生成成功 | {role_list_img_path}")
-                yield event.image_result(role_list_img_path)
+                html_file_path = await role_list_img(uid)
+                options = {} # 可选择传入渲染选项。
+                with open(html_file_path, 'r', encoding='utf-8') as f:
+                    TMPL = f.read()
+                url = await self.html_render(TMPL, {"items": ["吃饭", "睡觉", "玩原神"]}, options=options) # 第二个参数是 Jinja2 的渲染数据
+
+                logger.info(f"图片生成成功 | {url}")
+                yield event.image_result(url)
             except ValueError as e:
                 # 捕获查询失败的错误
                 logger.error(f"角色列表生成失败 | UID: {uid} | 错误: {str(e)}")
