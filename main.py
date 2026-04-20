@@ -76,7 +76,7 @@ class MyPlugin(Star):
     @filter.command("todo")
     async def custom_t2i_tmpl(self, event: AstrMessageEvent):
         options = {} # 可选择传入渲染选项。
-        html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "screen_role_list", "269377658_2026418_180516.html")
+        html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "python_characters.html")
         with open(html_path, 'r', encoding='utf-8') as f:
             TMPL = f.read()
         url = await self.html_render(TMPL, {"items": ["吃饭", "睡觉", "玩原神"]}, options=options) # 第二个参数是 Jinja2 的渲染数据
