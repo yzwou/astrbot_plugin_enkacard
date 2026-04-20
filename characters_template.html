@@ -4,7 +4,113 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>原神角色展示</title>
-<link rel="stylesheet" href="../characters.css">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        min-height: 100vh;
+        padding: 30px 10px;
+        margin: 0 auto;
+    }
+
+    .container {
+        margin: 0 auto;
+    }
+
+    h1 {
+        text-align: center;
+        color: #fff;
+        font-size: 1.6rem;
+        margin-bottom: 25px;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .char-list {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .char-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(8px);
+        border-radius: 12px;
+        padding: 12px 14px;
+        border: 1px solid rgba(255,255,255,0.1);
+        width: 480px;
+        margin: 0 auto;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .char-card:hover {
+        transform: translateX(5px);
+    }
+
+    .char-card.火 { background: rgba(255,107,53,0.08); border-color: rgba(255,107,53,0.18); }
+    .char-card.水 { background: rgba(74,144,226,0.08); border-color: rgba(74,144,226,0.18); }
+    .char-card.草 { background: rgba(52,199,89,0.08); border-color: rgba(52,199,89,0.18); }
+    .char-card.雷 { background: rgba(191,90,242,0.08); border-color: rgba(191,90,242,0.18); }
+    .char-card.冰 { background: rgba(100,210,255,0.08); border-color: rgba(100,210,255,0.18); }
+    .char-card.岩 { background: rgba(232,169,71,0.08); border-color: rgba(232,169,71,0.18); }
+    .char-card.风 { background: rgba(80,227,196,0.08); border-color: rgba(80,227,196,0.18); }
+
+    .char-card.火:hover { background: rgba(255,107,53,0.14); }
+    .char-card.水:hover { background: rgba(74,144,226,0.14); }
+    .char-card.草:hover { background: rgba(52,199,89,0.14); }
+    .char-card.雷:hover { background: rgba(191,90,242,0.14); }
+    .char-card.冰:hover { background: rgba(100,210,255,0.14); }
+    .char-card.岩:hover { background: rgba(232,169,71,0.14); }
+    .char-card.风:hover { background: rgba(80,227,196,0.14); }
+
+    .avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid rgba(255,255,255,0.25);
+    }
+
+    .info { flex: 1; }
+
+    .name {
+        color: #fff;
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .tags { display: flex; gap: 8px; font-size: 0.8rem; }
+
+    .ele {
+        padding: 3px 10px;
+        border-radius: 10px;
+        color: #fff;
+        font-weight: 500;
+    }
+    .ele.火 { background: linear-gradient(135deg,#ff6b35,#f7931e); }
+    .ele.水 { background: linear-gradient(135deg,#4a90e2,#5e5ce6); }
+    .ele.草 { background: linear-gradient(135deg,#34c759,#30d158); }
+    .ele.雷 { background: linear-gradient(135deg,#bf5af2,#ae4ee5); }
+    .ele.冰 { background: linear-gradient(135deg,#64d2ff,#5ac8fa); }
+    .ele.岩 { background: linear-gradient(135deg,#e8a947,#f0c040); }
+    .ele.风 { background: linear-gradient(135deg,#50e3c4,#6ee7b7); }
+
+    .lvl { color: #ffd700; font-weight: 600; }
+
+    .idx {
+        color: rgba(255,255,255,0.35);
+        font-size: 0.75rem;
+        min-width: 22px;
+    }
+
+</style>
 </head>
 <body>
 <div class="container">
