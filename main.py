@@ -39,6 +39,7 @@ class MyPlugin(Star):
                 html_file_path = await role_list_img(uid)
                 options = {
                     "quality": 90,
+
                 } # 可选择传入渲染选项。
                 with open(html_file_path, 'r', encoding='utf-8') as f:
                     TMPL = f.read()
