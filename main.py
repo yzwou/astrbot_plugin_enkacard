@@ -14,7 +14,7 @@ class MyPlugin(Star):
     def __init__(self, context: Context, config):
         super().__init__(context)
         self.config = config
-        self.enable_local = config.get("enable_local", False)
+        self.enable_local = self.config.get("enable_local", False)
 
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
