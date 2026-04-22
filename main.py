@@ -38,7 +38,7 @@ class MyPlugin(Star):
 
         if character_index is None:
             try:
-                if self.enable_local:
+                if not self.enable_local:
                     html_file_path = await role_list_img(uid, False)
                     options = {
                         "type": "jpeg",
@@ -48,11 +48,11 @@ class MyPlugin(Star):
                         TMPL = f.read()
                     url = await self.html_render(TMPL, {"items": ["吃饭", "睡觉", "玩原神"]}, options=options) # 第二个参数是 Jinja2 的渲染数据
 
-                    logger.info(f"图片生成成功 {self.enable_local}  {url}")
+                    logger.info(f"图片生成成功 {self.enable_local} | {url}")
                     yield event.image_result(url)
                 else:
                     img_path = await role_list_img(uid, True)
-                    logger.info(f"图片生成成功 {self.enable_local}  {img_path}")
+                    logger.info(f"图片生成成功 {self.enable_local} | {img_path}")
                     yield event.image_result(img_path)
 
             except ValueError as e:
