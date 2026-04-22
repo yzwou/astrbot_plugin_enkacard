@@ -39,17 +39,7 @@ class MyPlugin(Star):
                 html_file_path = await role_list_img(uid)
                 options = {
                     "type": "jpeg",
-                    "quality": 75,          # 适配NTQQ不报错
-                    "animations": "disabled",
-                    "scale": "css",
-
-                    # 👇 只固定左右裁切，高度全自动！
-                    "clip": {
-                        "x": 140,           # 左侧空白（固定，你的宽度1280专用）
-                        "y": 0,             # 顶部从0开始
-                        "width": 1000,      # 内容宽度（固定，1280-140*2）
-                        "height": "auto"    # ✅ 关键：高度自动（自适应内容）
-                    }
+                    "quality": 100
                 }
                 with open(html_file_path, 'r', encoding='utf-8') as f:
                     TMPL = f.read()
