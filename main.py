@@ -39,7 +39,7 @@ class MyPlugin(Star):
                 html_file_path = await role_list_img(uid)
                 options = {
                     "quality": 90,
-
+                    "full_page": False,
                 } # 可选择传入渲染选项。
                 with open(html_file_path, 'r', encoding='utf-8') as f:
                     TMPL = f.read()
@@ -83,7 +83,10 @@ class MyPlugin(Star):
 
     @filter.command("todo")
     async def custom_t2i_tmpl(self, event: AstrMessageEvent):
-        options = {} # 可选择传入渲染选项。
+        options = {
+            "quality": 90,
+            "full_page": False,
+        } # 可选择传入渲染选项。
         html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "python_characters.html")
         with open(html_path, 'r', encoding='utf-8') as f:
             TMPL = f.read()
