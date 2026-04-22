@@ -11,8 +11,10 @@ from .generate_role_list import role_list_img
 
 @register("astrbot_plugin_enkacard", "yzwou", "获取指定原神玩家信息的插件", "1.0.0")
 class MyPlugin(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config):
         super().__init__(context)
+        self.config = config
+        self.enable_local = config.get("enable_local", False)
 
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
@@ -36,17 +38,23 @@ class MyPlugin(Star):
 
         if character_index is None:
             try:
-                html_file_path = await role_list_img(uid)
-                options = {
-                    "type": "jpeg",
-                    "quality": 100
-                }
-                with open(html_file_path, 'r', encoding='utf-8') as f:
-                    TMPL = f.read()
-                url = await self.html_render(TMPL, {"items": ["吃饭", "睡觉", "玩原神"]}, options=options) # 第二个参数是 Jinja2 的渲染数据
+                if self.enable_local:
+                    html_file_path = await role_list_img(uid, False)
+                    options = {
+                        "type": "jpeg",
+                        "quality": 100
+                    }
+                    with open(html_file_path, 'r', encoding='utf-8') as f:
+                        TMPL = f.read()
+                    url = await self.html_render(TMPL, {"items": ["吃饭", "睡觉", "玩原神"]}, options=options) # 第二个参数是 Jinja2 的渲染数据
 
-                logger.info(f"图片生成成功 | {url}")
-                yield event.image_result(url)
+                    logger.info(f"图片生成成功 | {url}")
+                    yield event.image_result(url)
+                else:
+                    img_path = await role_list_img(uid, True)
+                    logger.info(f"图片生成成功 | {img_path}")
+                    yield event.image_result(img_path)
+
             except ValueError as e:
                 # 捕获查询失败的错误
                 logger.error(f"角色列表生成失败 | UID: {uid} | 错误: {str(e)}")

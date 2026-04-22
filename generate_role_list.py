@@ -83,7 +83,7 @@ async def html_to_image(html_file_path: str, screenshot_path: str) -> str:
         return screenshot_path
 
 
-async def role_list_img(uid: str):
+async def role_list_img(uid: str, render: bool = False):
     """
     生成角色列表图片
 
@@ -141,9 +141,11 @@ async def role_list_img(uid: str):
 
     print(f'HTML文件绝对路径: {html_file_path}')
 
-    # 使用 Playwright 渲染 html 页面，等待图片加载完成
-    screenshot_path = os.path.join(script_dir, f'{file_name}.png')
-    # await html_to_image(html_file_path, screenshot_path)
+    if render:
+        # 使用 Playwright 渲染 html 页面，等待图片加载完成
+        screenshot_path = os.path.join(script_dir, f'{file_name}.png')
+        await html_to_image(html_file_path, screenshot_path)
+        return screenshot_path
 
     return html_file_path
 

@@ -1,0 +1,8 @@
+{
+  "enable_local": {
+    "description": "启用本地图片渲染",
+    "type": "bool",
+    "default": false,
+    "hint": "启用后，将使用本地的 Playwright 渲染 html 页面，否则使用Astrbot的API渲染（本地效果更好）"
+  }
+}
