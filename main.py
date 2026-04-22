@@ -38,8 +38,19 @@ class MyPlugin(Star):
             try:
                 html_file_path = await role_list_img(uid)
                 options = {
-                    "quality": 90,
-                } # 可选择传入渲染选项。
+                    "type": "jpeg",
+                    "quality": 75,          # 适配NTQQ不报错
+                    "animations": "disabled",
+                    "scale": "css",
+
+                    # 👇 只固定左右裁切，高度全自动！
+                    "clip": {
+                        "x": 140,           # 左侧空白（固定，你的宽度1280专用）
+                        "y": 0,             # 顶部从0开始
+                        "width": 1000,      # 内容宽度（固定，1280-140*2）
+                        "height": "auto"    # ✅ 关键：高度自动（自适应内容）
+                    }
+                }
                 with open(html_file_path, 'r', encoding='utf-8') as f:
                     TMPL = f.read()
                 url = await self.html_render(TMPL, {"items": ["吃饭", "睡觉", "玩原神"]}, options=options) # 第二个参数是 Jinja2 的渲染数据
