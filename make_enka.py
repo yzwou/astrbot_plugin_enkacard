@@ -160,7 +160,7 @@ async def list_roles_dict(uid):
     
     # 检查是否返回错误信息
     if "error" in data:
-        raise ValueError(f"查询失败: {data['error']}")
+        raise ValueError(data['error'], data['status'])
     
     info_list = data.get("playerInfo", {}).get("showAvatarInfoList", [])
     character_list = []

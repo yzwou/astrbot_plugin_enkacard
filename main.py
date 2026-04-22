@@ -37,30 +37,38 @@ class MyPlugin(Star):
             return
 
         if character_index is None:
-            if not self.enable_local:
-                html_file_path = await role_list_img(uid, False)
-                options = {
-                    "type": "jpeg",
-                    "quality": 100
-                }
-                with open(html_file_path, 'r', encoding='utf-8') as f:
-                    TMPL = f.read()
-                url = await self.html_render(TMPL, {"items": ["吃饭", "睡觉", "玩原神"]}, options=options) # 第二个参数是 Jinja2 的渲染数据
+            try:
+                if not self.enable_local:
+                    html_file_path = await role_list_img(uid, False)
+                    options = {
+                        "type": "jpeg",
+                        "quality": 100
+                    }
+                    with open(html_file_path, 'r', encoding='utf-8') as f:
+                        TMPL = f.read()
+                    url = await self.html_render(TMPL, {"items": ["吃饭", "睡觉", "玩原神"]}, options=options) # 第二个参数是 Jinja2 的渲染数据
 
-                logger.info(f"使用API渲染图片生成成功 | {url}")
-                yield event.image_result(url)
-            else:
-                img_path = await role_list_img(uid, True)
-                logger.info(f"使用本地渲染图片生成成功 | {img_path}")
-                yield event.image_result(img_path)
+                    logger.info(f"使用API渲染图片生成成功 | {url}")
+                    yield event.image_result(url)
+                else:
+                    img_path = await role_list_img(uid, True)
+                    logger.info(f"使用本地渲染图片生成成功 | {img_path}")
+                    yield event.image_result(img_path)
 
-            # except Exception or ValueError as e:
-            #     # 捕获其他未知错误
-            #     err_msg = "\n"
-            #     if "424" in str(e):
-            #         err_msg += "Enka.network似乎不稳定或在维护中，再试一次或稍后再试"
-            #     logger.error(f"角色列表生成失败 | UID: {uid} | 错误: {str(e)}{err_msg}", exc_info=True)
-            #     yield event.plain_result(f"❌ 生成角色列表时发生错误: {str(e)}{err_msg}")
+            except ValueError as e:
+                if tuple(e)[1] == "-1":
+                    logger.error(f"❌ Enka.network似乎不稳定或在维护中，再试一次或稍后再试。错误：{str(e)}", exc_info=True)
+                    yield event.plain_result(f"❌ Enka.network似乎不稳定或在维护中，再试一次或稍后再试。错误：{str(e)}")
+                logger.error(f"生成失败 | UID: {uid} | 错误: {str(e)}", exc_info=True)
+                yield event.plain_result(f"❌ {str(e)}")
+
+            except Exception as e:
+                # 捕获其他未知错误
+                err_msg = ""
+                if "424" in str(e):
+                    err_msg += "\nEnka.network似乎不稳定或在维护中，再试一次或稍后再试"
+                logger.error(f"角色列表生成失败 | UID: {uid} | 错误: {str(e)}{err_msg}", exc_info=True)
+                yield event.plain_result(f"❌ 生成角色列表时发生错误: {str(e)}{err_msg}")
 
         else:
                 # 转换 uid 为字符串
