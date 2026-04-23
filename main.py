@@ -56,9 +56,8 @@ class MyPlugin(Star):
                     yield event.image_result(img_path)
 
             except ValueError as e:
-                if e[1] == "-1": # TODO Error不可作为tuple
-                    logger.error(f"❌ Enka.network似乎不稳定或在维护中，再试一次或稍后再试。错误：{str(e)}", exc_info=True)
-                    yield event.plain_result(f"❌ Enka.network似乎不稳定或在维护中，再试一次或稍后再试。错误：{str(e)}")
+                # logger.error(f"❌ Enka.network似乎不稳定或在维护中，再试一次或稍后再试。错误：{str(e)}", exc_info=True)
+                # yield event.plain_result(f"❌ Enka.network似乎不稳定或在维护中，再试一次或稍后再试。错误：{str(e)}")
                 logger.error(f"生成失败 | UID: {uid} | 错误: {str(e)}", exc_info=True)
                 yield event.plain_result(f"❌ {str(e)}")
 
