@@ -124,6 +124,7 @@ async def role_list_img(uid: str, render: bool = False):
 
     # 渲染模板
     output = template.render(
+        uid=uid,
         chars=chars,
         map_dict=map_dict,
         json_map=json.dumps(map_dict)  # 转换为 JSON 字符串供 JS 使用

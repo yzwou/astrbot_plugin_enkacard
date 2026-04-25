@@ -106,7 +106,7 @@
 
     .idx {
         color: rgba(255,255,255,0.35);
-        font-size: 0.75rem;
+        font-size: 1rem;
         min-width: 22px;
     }
 
@@ -114,7 +114,7 @@
 </head>
 <body>
 <div class="container">
-<h1>uid角色</h1>
+<h1>{{ uid }}角色</h1>
 <div class="char-list" id="list">
 {% for char in chars %}
 <div class="char-card {{ char.ele }}">
