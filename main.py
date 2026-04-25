@@ -68,7 +68,7 @@ class MyPlugin(Star):
                     err_msg += "\nEnka.network似乎不稳定或在维护中，再试一次或稍后再试"
                 logger.error(f"角色列表生成失败 | UID: {uid} | 错误: {str(e)}{err_msg}", exc_info=True)
                 yield event.plain_result(f"❌ 生成角色列表时发生错误: {str(e)}{err_msg}")
-
+        else:
             # 转换 uid 为字符串
             uid_str = str(uid)
 
