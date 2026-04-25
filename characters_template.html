@@ -23,7 +23,15 @@
         text-align: center;
         color: #fff;
         font-size: 1.6rem;
-        margin-bottom: 25px;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    h3{
+        text-align: center;
+        color: #fff;
+        font-size: 0.8rem;
+        margin-bottom: 15px;
         text-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
 
@@ -114,7 +122,8 @@
 </head>
 <body>
 <div class="container">
-<h1>{{ uid }}角色</h1>
+<h1>角色列表</h1>
+<h3 style="font-size: 0.8rem">UID: {{ uid }}</h3>
 <div class="char-list" id="list">
 {% for char in chars %}
 <div class="char-card {{ char.ele }}">
