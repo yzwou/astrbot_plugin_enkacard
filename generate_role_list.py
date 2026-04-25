@@ -93,23 +93,24 @@ async def role_list_img(uid: str, render: bool = False):
     local_time = time.localtime()
     chars = await list_roles_dict(uid)
 
-    # 加载 .genshincharacters.json 构建映射
-    json_path = os.path.join(script_dir, "genshincharacters.json")
+    # 加载 AvatarExcelConfigData.json 构建映射
+    json_path = os.path.join(script_dir, "AvatarExcelConfigData.json")
     with open(json_path, "r", encoding="utf-8") as f:
-        char_data = json.load(f)
+        char_data_list = json.load(f)
 
-    # 构建 id -> SideIconName 映射
+    # 构建 id -> SideIconName 映射（新文件格式为数组）
     map_dict = {}
-    for char_id, info in char_data.items():
-        side_icon = info.get("SideIconName", "")
-        if side_icon:
+    for char_info in char_data_list:
+        char_id = char_info.get("id")
+        side_icon = char_info.get("sideIconName", "")  # 注意：新文件使用小写开头的字段名
+        if char_id and side_icon:
             # 提取角色名部分：UI_AvatarIcon_Side_Kazuha -> Kazuha
             name = side_icon.replace("UI_AvatarIcon_Side_", "")
             try:
                 map_dict[int(char_id)] = name
-            except ValueError:
+            except (ValueError, TypeError):
                 pass
-        else:
+        elif char_id:
             map_dict[int(char_id)] = "PlayerBoy"
 
     # 设置 Jinja2 环境
