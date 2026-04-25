@@ -37,54 +37,54 @@ class MyPlugin(Star):
             return
 
         if character_index is None:
-            # try:
-            if not self.enable_local:
-                html_file_path = await role_list_img(uid, False)
-                options = {
-                    "type": "jpeg",
-                    "quality": 100
-                }
-                with open(html_file_path, 'r', encoding='utf-8') as f:
-                    TMPL = f.read()
-                url = await self.html_render(TMPL, {"items": ["吃饭", "睡觉", "玩原神"]}, options=options) # 第二个参数是 Jinja2 的渲染数据
+            try:
+                if not self.enable_local:
+                    html_file_path = await role_list_img(uid, False)
+                    options = {
+                        "type": "jpeg",
+                        "quality": 100
+                    }
+                    with open(html_file_path, 'r', encoding='utf-8') as f:
+                        TMPL = f.read()
+                    url = await self.html_render(TMPL, {"items": ["吃饭", "睡觉", "玩原神"]}, options=options) # 第二个参数是 Jinja2 的渲染数据
 
-                logger.info(f"使用API渲染图片生成成功 | {url}")
-                yield event.image_result(url)
-            else:
-                img_path = await role_list_img(uid, True)
-                logger.info(f"使用本地渲染图片生成成功 | {img_path}")
-                yield event.image_result(img_path)
+                    logger.info(f"使用API渲染图片生成成功 | {url}")
+                    yield event.image_result(url)
+                else:
+                    img_path = await role_list_img(uid, True)
+                    logger.info(f"使用本地渲染图片生成成功 | {img_path}")
+                    yield event.image_result(img_path)
 
-            # except ValueError as e:
-            #     # logger.error(f"❌ Enka.network似乎不稳定或在维护中，再试一次或稍后再试。错误：{str(e)}", exc_info=True)
-            #     # yield event.plain_result(f"❌ Enka.network似乎不稳定或在维护中，再试一次或稍后再试。错误：{str(e)}")
-            #     logger.error(f"生成失败 | UID: {uid} | 错误: {str(e)}", exc_info=True)
-            #     yield event.plain_result(f"❌ {str(e)}")
-            #
-            # except Exception as e:
-            #     # 捕获其他未知错误
-            #     err_msg = ""
-            #     if "424" in str(e):
-            #         err_msg += "\nEnka.network似乎不稳定或在维护中，再试一次或稍后再试"
-            #     logger.error(f"角色列表生成失败 | UID: {uid} | 错误: {str(e)}{err_msg}", exc_info=True)
-            #     yield event.plain_result(f"❌ 生成角色列表时发生错误: {str(e)}{err_msg}")
+            except ValueError as e:
+                # logger.error(f"❌ Enka.network似乎不稳定或在维护中，再试一次或稍后再试。错误：{str(e)}", exc_info=True)
+                # yield event.plain_result(f"❌ Enka.network似乎不稳定或在维护中，再试一次或稍后再试。错误：{str(e)}")
+                logger.error(f"生成失败 | UID: {uid} | 错误: {str(e)}", exc_info=True)
+                yield event.plain_result(f"❌ {str(e)}")
 
-                # 转换 uid 为字符串
-                uid_str = str(uid)
+            except Exception as e:
+                # 捕获其他未知错误
+                err_msg = ""
+                if "424" in str(e):
+                    err_msg += "\nEnka.network似乎不稳定或在维护中，再试一次或稍后再试"
+                logger.error(f"角色列表生成失败 | UID: {uid} | 错误: {str(e)}{err_msg}", exc_info=True)
+                yield event.plain_result(f"❌ 生成角色列表时发生错误: {str(e)}{err_msg}")
 
-                yield event.plain_result(f"正在生成 UID {uid_str} 的角色卡片...")
+            # 转换 uid 为字符串
+            uid_str = str(uid)
 
-                # 调用爬虫函数，返回值为 (success, result, error)
-                success, image_path, error = await async_scrape_enka(uid_str, character_index=character_index, headless=True)
+            yield event.plain_result(f"正在生成 UID {uid_str} 的角色卡片...")
 
-                if not success:
-                    # 记录详细错误信息到日志
-                    logger.error(f"角色卡片生成失败 | UID: {uid_str} | 错误: {error}")
-                    yield event.plain_result(f"❌ 角色卡片生成失败: {error}")
-                    return
+            # 调用爬虫函数，返回值为 (success, result, error)
+            success, image_path, error = await async_scrape_enka(uid_str, character_index=character_index, headless=True)
 
-                # 发送图片（使用 image_result 发送本地图片）
-                yield event.image_result(image_path)
+            if not success:
+                # 记录详细错误信息到日志
+                logger.error(f"角色卡片生成失败 | UID: {uid_str} | 错误: {error}")
+                yield event.plain_result(f"❌ 角色卡片生成失败: {error}")
+                return
+
+            # 发送图片（使用 image_result 发送本地图片）
+            yield event.image_result(image_path)
 
     @filter.command("image") # 注册一个 /image 指令，接收 text 参数。
     async def on_aiocqhttp(self, event: AstrMessageEvent, text: str):
