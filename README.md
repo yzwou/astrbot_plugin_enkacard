@@ -1,7 +1,5 @@
 # AstrBot 原神角色卡片插件
 
-#####TODO playwright install#####
-
 一个用于 AstrBot 的插件，可以从 [enka.network](https://enka.network/) 获取原神玩家的角色信息并生成角色卡片图片。
 
 ## 功能特性
@@ -49,6 +47,11 @@ brew install --cask google-chrome
 
 </details>
 
+### 可选依赖：若启用 本地图片渲染 ，则需要本地安装 Playwright
+```bash
+pip install playwright
+python -m playwright install
+```
 
 ### 插件安装：通过 AstrBot 安装（推荐）
 
@@ -73,7 +76,7 @@ pip install -r requirements.txt
 
 ## 使用说明
 
-### 查看指定 UID 的角色
+### 查看指定 UID 的角色列表
 
 ```
 /角色 <UID>

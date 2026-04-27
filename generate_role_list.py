@@ -86,70 +86,88 @@ async def html_to_image(html_file_path: str, screenshot_path: str) -> str:
 async def role_list_img(uid: str, render: bool = False):
     """
     生成角色列表图片
-
-    :return 图片路径 角色信息
+    
+    :param uid: 玩家UID
+    :param render: 是否渲染为图片（True返回图片路径，False返回HTML路径）
+    :return: 成功时返回文件路径字符串，失败时返回错误信息字符串（以"ERROR:"开头）
     """
     script_dir = os.path.dirname(os.path.abspath(__file__))
     local_time = time.localtime()
-    chars = await list_roles_dict(uid)
-
-    # 加载 AvatarExcelConfigData.json 构建映射
-    json_path = os.path.join(script_dir, "AvatarExcelConfigData.json")
-    with open(json_path, "r", encoding="utf-8") as f:
-        char_data_list = json.load(f)
-
-    # 构建 id -> SideIconName 映射（新文件格式为数组）
-    map_dict = {}
-    for char_info in char_data_list:
-        char_id = char_info.get("id")
-        side_icon = char_info.get("sideIconName", "")  # 注意：新文件使用小写开头的字段名
-        if char_id and side_icon:
-            # 提取角色名部分：UI_AvatarIcon_Side_Kazuha -> Kazuha
-            name = side_icon.replace("UI_AvatarIcon_Side_", "")
-            try:
-                map_dict[int(char_id)] = name
-            except (ValueError, TypeError):
-                pass
-        elif char_id:
-            map_dict[int(char_id)] = "PlayerBoy"
-
-    # 设置 Jinja2 环境
-    env = Environment(
-        loader=FileSystemLoader(script_dir),
-        trim_blocks=True,
-        lstrip_blocks=True
-    )
-
-    # 加载模板
-    template = env.get_template("characters_template.html")
-
-    # 渲染模板
-    output = template.render(
-        uid=uid,
-        chars=chars,
-        map_dict=map_dict,
-        json_map=json.dumps(map_dict)  # 转换为 JSON 字符串供 JS 使用
-    )
-
-    # 输出到文件
-    file_name = f'screen_role_list/{uid}_{local_time.tm_year}{local_time.tm_mon}{local_time.tm_mday}_{time.strftime("%H%M%S")}'
-    html_file_path = os.path.join(script_dir, f'{file_name}.html')
     
-    # 确保目录存在
-    os.makedirs(os.path.dirname(html_file_path), exist_ok=True)
+    try:
+        chars = await list_roles_dict(uid)
+    except ValueError as e:
+        error_msg = f"获取角色数据失败: {str(e)}"
+        return f"ERROR:{error_msg}"
+    except Exception as e:
+        error_msg = f"获取角色数据时发生未知错误: {str(e)}"
+        return f"ERROR:{error_msg}"
+
+    try:
+        # 加载 AvatarExcelConfigData.json 构建映射
+        json_path = os.path.join(script_dir, "AvatarExcelConfigData.json")
+        with open(json_path, "r", encoding="utf-8") as f:
+            char_data_list = json.load(f)
+
+        # 构建 id -> SideIconName 映射（新文件格式为数组）
+        map_dict = {}
+        for char_info in char_data_list:
+            char_id = char_info.get("id")
+            side_icon = char_info.get("sideIconName", "")  # 注意：新文件使用小写开头的字段名
+            if char_id and side_icon:
+                # 提取角色名部分：UI_AvatarIcon_Side_Kazuha -> Kazuha
+                name = side_icon.replace("UI_AvatarIcon_Side_", "")
+                try:
+                    map_dict[int(char_id)] = name
+                except (ValueError, TypeError):
+                    pass
+            elif char_id:
+                map_dict[int(char_id)] = "PlayerBoy"
+
+        # 设置 Jinja2 环境
+        env = Environment(
+            loader=FileSystemLoader(script_dir),
+            trim_blocks=True,
+            lstrip_blocks=True
+        )
+
+        # 加载模板
+        template = env.get_template("characters_template.html")
+
+        # 渲染模板
+        output = template.render(
+            uid=uid,
+            chars=chars,
+            map_dict=map_dict,
+            json_map=json.dumps(map_dict)  # 转换为 JSON 字符串供 JS 使用
+        )
+
+        # 输出到文件
+        file_name = f'screen_role_list/{uid}_{local_time.tm_year}{local_time.tm_mon}{local_time.tm_mday}_{time.strftime("%H%M%S")}'
+        html_file_path = os.path.join(script_dir, f'{file_name}.html')
+        
+        # 确保目录存在
+        os.makedirs(os.path.dirname(html_file_path), exist_ok=True)
+        
+        with open(html_file_path, "w", encoding="utf-8") as f:
+            f.write(output)
+
+        print(f'HTML文件绝对路径: {html_file_path}')
+
+        if render:
+            # 使用 Playwright 渲染 html 页面，等待图片加载完成
+            screenshot_path = os.path.join(script_dir, f'{file_name}.png')
+            await html_to_image(html_file_path, screenshot_path)
+            return screenshot_path
+
+        return html_file_path
     
-    with open(html_file_path, "w", encoding="utf-8") as f:
-        f.write(output)
-
-    print(f'HTML文件绝对路径: {html_file_path}')
-
-    if render:
-        # 使用 Playwright 渲染 html 页面，等待图片加载完成
-        screenshot_path = os.path.join(script_dir, f'{file_name}.png')
-        await html_to_image(html_file_path, screenshot_path)
-        return screenshot_path
-
-    return html_file_path
+    except FileNotFoundError as e:
+        error_msg = f"文件未找到: {str(e)}"
+        return f"ERROR:{error_msg}"
+    except Exception as e:
+        error_msg = f"生成角色列表时发生错误: {str(e)}"
+        return f"ERROR:{error_msg}"
 
 
 
