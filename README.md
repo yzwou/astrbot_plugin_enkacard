@@ -51,13 +51,17 @@ brew install --cask google-chrome
 ```bash
 pip install playwright
 python -m playwright install
+
+或者
+pip install playwright
+playwright install
 ```
 
-### 插件安装：通过 AstrBot 安装（推荐）
+### 插件安装1：通过 AstrBot 安装（推荐但暂不可用）
 
 在 AstrBot 插件市场中搜索并找到 **Enkacard** 后安装
 
-### 插件安装：手动安装
+### 插件安装2：手动安装
 
 1. 克隆本仓库到 `data/plugins` 文件夹下：
 
