@@ -60,13 +60,13 @@
         transform: translateX(5px);
     }
 
-    .char-card.火 { background: rgba(255,107,53,0.08); border-color: rgba(255,107,53,0.18); }
-    .char-card.水 { background: rgba(74,144,226,0.08); border-color: rgba(74,144,226,0.18); }
-    .char-card.草 { background: rgba(52,199,89,0.08); border-color: rgba(52,199,89,0.18); }
-    .char-card.雷 { background: rgba(191,90,242,0.08); border-color: rgba(191,90,242,0.18); }
-    .char-card.冰 { background: rgba(100,210,255,0.08); border-color: rgba(100,210,255,0.18); }
-    .char-card.岩 { background: rgba(232,169,71,0.08); border-color: rgba(232,169,71,0.18); }
-    .char-card.风 { background: rgba(80,227,196,0.08); border-color: rgba(80,227,196,0.18); }
+    .char-card.火 { background: rgba(255,107,53,0.22); border-color: rgba(255,107,53,0.45); box-shadow: 0 4px 20px rgba(255,107,53,0.2); }
+    .char-card.水 { background: rgba(74,144,226,0.22); border-color: rgba(74,144,226,0.45); box-shadow: 0 4px 20px rgba(74,144,226,0.2); }
+    .char-card.草 { background: rgba(52,199,89,0.22); border-color: rgba(52,199,89,0.45); box-shadow: 0 4px 20px rgba(52,199,89,0.2); }
+    .char-card.雷 { background: rgba(191,90,242,0.22); border-color: rgba(191,90,242,0.45); box-shadow: 0 4px 20px rgba(191,90,242,0.2); }
+    .char-card.冰 { background: rgba(100,210,255,0.35); border-color: rgba(100,210,255,0.55); box-shadow: 0 4px 20px rgba(100,210,255,0.25); }
+    .char-card.岩 { background: rgba(232,169,71,0.22); border-color: rgba(232,169,71,0.45); box-shadow: 0 4px 20px rgba(232,169,71,0.2); }
+    .char-card.风 { background: rgba(80,227,196,0.32); border-color: rgba(80,227,196,0.52); box-shadow: 0 4px 20px rgba(80,227,196,0.25); }
 
     .char-card.火:hover { background: rgba(255,107,53,0.14); }
     .char-card.水:hover { background: rgba(74,144,226,0.14); }
@@ -110,13 +110,22 @@
     .ele.岩 { background: linear-gradient(135deg,#e8a947,#f0c040); }
     .ele.风 { background: linear-gradient(135deg,#50e3c4,#6ee7b7); }
 
-    .lvl { color: #ffd700; font-weight: 600; }
+    .lvl {
+        color: #ffec97;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 10px;
+        background: rgb(0 0 0 / 0.05);
+        border: 1px solid rgba(255,255,255,0.25);
+        backdrop-filter: blur(4px);
+    }
 
     .idx {
-        color: rgba(255,255,255,0.35);
+        color: rgb(0 0 0 / 0.5);
         font-size: 1rem;
         min-width: 22px;
     }
+
 
 </style>
 </head>
