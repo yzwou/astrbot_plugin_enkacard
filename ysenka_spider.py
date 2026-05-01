@@ -502,10 +502,10 @@ async def async_main():
         uid, character_index=character_index, headless=headless
     )
 
-    if not result:
-        print("\n❌ 运行失败，请查看报错或 screen 文件夹下的 error 截图。")
+    if not result[0]:
+        print(f"\n❌ 运行失败: {result[2]}")
     else:
-        print(f"\n✅ 成功下载图片: {result}")
+        print(f"\n✅ 成功下载图片: {result[1]}")
 
 
 def main():

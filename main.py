@@ -44,7 +44,7 @@ class MyPlugin(Star):
                     }
                     with open(html_file_path, 'r', encoding='utf-8') as f:
                         TMPL = f.read()
-                    url = await self.html_render(TMPL, {"items": ["吃饭", "睡觉", "玩原神"]}, options=options) # 第二个参数是 Jinja2 的渲染数据
+                    url = await self.html_render(TMPL, {}, options=options)
 
                     logger.info(f"使用API渲染图片生成成功 | {url}")
                     yield event.image_result(url)

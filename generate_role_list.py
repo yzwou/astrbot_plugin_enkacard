@@ -5,11 +5,10 @@ from jinja2 import Environment, FileSystemLoader
 import json
 import asyncio
 
-from playwright.async_api import async_playwright
-
 from .make_enka import *
 
 async def html_to_image(html_file_path: str, screenshot_path: str) -> str:
+    from playwright.async_api import async_playwright
     """
     将 HTML 文件转换为图片
     
@@ -26,7 +25,7 @@ async def html_to_image(html_file_path: str, screenshot_path: str) -> str:
 
         # 设置固定的视口宽度（1200px），高度自动调整
         context = await browser.new_context(
-            viewport={'width': 600, 'height': 800}
+            viewport={'width': 800, 'height': 900}
         )
         page = await context.new_page()
 
