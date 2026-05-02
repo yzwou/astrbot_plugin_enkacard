@@ -19,11 +19,11 @@ class MyPlugin(Star):
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
 
-    @filter.command("角色")
+    @filter.command("ys")
     async def character_card(self, event: AstrMessageEvent, uid: str = None, character_index: int = None):
-        """获取原神角色卡片图片。用法: /角色 [uid] [角色编号（选填）]"""
+        """获取原神角色卡片图片。用法: /ys [uid] [角色编号（选填）]"""
         if not uid:
-            yield event.plain_result("用法: /角色 [uid] [角色编号（选填）]\n示例: /角色 269377658 1")
+            yield event.plain_result("用法: /ys [uid] [角色编号（选填）]\n示例: /ys 269377658 1")
             return
 
         if character_index is None:
