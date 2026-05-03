@@ -24,13 +24,17 @@
 
 ```bash
 # Ubuntu/Debian
-sudo apt-get install -y chromium-browser chromium-sandbox fonts-wqy-zenhei
+sudo apt update
+sudo apt install -y chromium fonts-wqy-zenhei
 
 # Fedora
-sudo dnf install chromium
+sudo dnf install -y chromium chromium-driver wqy-zenhei-fonts
 
 # Arch Linux
-sudo pacman -S chromium
+sudo pacman -Syu chromium chromium-driver wqy-zenhei
+
+# 检查是否安装成功
+chromium --version
 ```
 
 > **Docker 用户注意**：如果 AstrBot 运行在 Docker 容器内，需要在容器中执行上述命令安装依赖。
