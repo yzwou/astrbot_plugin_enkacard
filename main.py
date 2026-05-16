@@ -32,13 +32,13 @@ class MyPlugin(Star):
 
     async def _on_first_run(self, plugin_data_path: Path):
         """插件首次运行时执行，仅调用一次。"""
-        logger.info(f"[{PLUGIN_NAME}] 首次运行，执行初始化...")
+        logger.info(f"{PLUGIN_NAME} 首次运行，执行初始化...")
         try:
             await enka_update()
         except Exception as e:
             logger.error(f"初始化失败：{e}")
             return
-        logger.info(f"[{PLUGIN_NAME}] 初始化完成")
+        logger.info(f"{PLUGIN_NAME} 初始化完成")
         (plugin_data_path / ".initialized").touch()
 
 
