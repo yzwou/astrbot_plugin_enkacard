@@ -55,7 +55,7 @@ async def enka_card(uid="269377658", idx = "10000047"):
     retry_delay = 2  # 秒
     last_error = None
 
-    avatar_id = list_roles_dict("269377658")[int(idx)-1]
+    avatar_id = (await list_roles_dict(uid))[int(idx)-1]["id"]
 
     for attempt in range(1, max_retries + 1):
         try:
