@@ -14,20 +14,7 @@
 
 本插件使用 Enkacard pip库进行角色卡片图片生成，因此需要安装 **Enkacard库及必要文件**。
 
-#### Windows
 
-访问 [Google Chrome 官网](https://www.google.com/chrome/) 下载并安装 Google Chrome。
-
-#### Linux 用户
-
-**方法一：使用 Playwright 安装 Chromium（推荐，不包含字体）**
-
-Playwright 可以直接下载适配的 Chromium 二进制文件，无需依赖系统包管理器：
-
-```bash
-pip install playwright
-playwright install chromium
-```
 
 ### 可选依赖2：Playwright
 ```bash
