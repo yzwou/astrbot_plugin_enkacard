@@ -35,7 +35,7 @@ async def enka_test():
     async with encbanner.ENC(uid = "269377658", lang="chs", character_id="10000047") as encard:
         return await encard.creat()
 
-async def enka_card(uid="269377658", avatar_id="10000047"):
+async def enka_card(uid="269377658", idx = "10000047"):
     """
     生成单角色卡片图片
 
@@ -54,6 +54,8 @@ async def enka_card(uid="269377658", avatar_id="10000047"):
     max_retries = 3
     retry_delay = 2  # 秒
     last_error = None
+
+    avatar_id = list_roles_dict("269377658")[int(idx)-1]
 
     for attempt in range(1, max_retries + 1):
         try:
