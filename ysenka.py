@@ -9,7 +9,7 @@ from pathlib import Path
 #     sys.path.insert(0, plugin_dir)
 
 from enkacard import encbanner
-from make_enka import *
+from .make_enka import *
 import asyncio
 
 from astrbot.api import logger
