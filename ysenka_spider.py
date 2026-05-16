@@ -51,7 +51,6 @@ def check_linux_chrome_env():
             try:
                 result = subprocess.run([cmd, "--version"], capture_output=True, text=True, timeout=5)
                 if result.returncode == 0:
-                    print(f"✅ 找到浏览器: {cmd} ({result.stdout.strip()})")
                     return True, ""
             except FileNotFoundError:
                 continue
@@ -66,14 +65,12 @@ def check_linux_chrome_env():
         ]
         for path in chrome_paths:
             if os.path.exists(path) and os.access(path, os.X_OK):
-                print(f"✅ 找到可执行文件路径: {path}")
                 return True, ""
 
         error_msg = ("未找到 Chrome 或 Chromium 浏览器。\n"
                      "由于您的环境是 Debian Trixie (Docker)，建议安装 Chromium：\n"
                      "1. apt-get update\n"
                      "2. apt-get install -y chromium chromium-sandbox fonts-wqy-zenhei")
-        print(f"❌ {error_msg}")
         return False, error_msg
     except Exception as e:
         return False, f"检查环境时出错: {str(e)}"
@@ -120,26 +117,17 @@ def _get_install_command(missing_libs):
 def setup_chromedriver_for_windows():
     """Windows 系统下配置 ChromeDriver"""
     try:
-        # 方法 1: 尝试使用 Selenium 4.6+ 的 Selenium Manager（自动管理驱动）
-        print("尝试使用 Selenium Manager 自动管理 ChromeDriver...")
-        return None  # 返回 None 让 Selenium 自动管理
+        return None  # 返回 None 让 Selenium Manager 自动管理
 
-    except Exception as e:
-        print(f"Selenium Manager 失败: {e}")
-
-        # 方法 2: 尝试使用 webdriver-manager
+    except Exception:
+        # 尝试使用 webdriver-manager
         try:
             from selenium.webdriver.chrome.service import Service
             from webdriver_manager.chrome import ChromeDriverManager
 
-            print("尝试使用 webdriver-manager...")
             service = Service(ChromeDriverManager().install())
             return service
-        except ImportError:
-            print("webdriver-manager 未安装，尝试自动管理...")
-            return None
-        except Exception as e2:
-            print(f"webdriver-manager 失败: {e2}")
+        except (ImportError, Exception):
             return None
 
 
@@ -167,8 +155,7 @@ async def async_get_character_list(driver):
 
             character_list.append({"index": idx, "name": char_name, "element": avatar})
         return character_list
-    except Exception as e:
-        print(f"获取角色列表失败: {e}")
+    except Exception:
         return []
 
 
@@ -181,25 +168,21 @@ async def async_switch_character(driver, character_list, target_index):
         for char in character_list:
             if char["index"] == target_index:
                 target_element = char["element"]
-                print(f"找到角色 #{target_index}: {char['name']}")
                 break
 
         if not target_element:
-            print(f"未找到角色 #{target_index}")
             return False
 
         # 检查是否已选中
         class_attr = target_element.get_attribute("class") or ""
         if class_attr.endswith(" s") or " live s" in class_attr:
-            print("角色已处于选中状态")
             return True
 
         # 点击切换并等待渲染
         target_element.click()
         await asyncio.sleep(3)  # 异步等待
         return True
-    except Exception as e:
-        print(f"切换角色操作失败: {e}")
+    except Exception:
         return False
 
 
@@ -238,14 +221,9 @@ async def async_scrape_enka(uid, character_index=None, headless=True):
             # Linux 服务器配置
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
-            print("🐧 检测到 Linux 系统，应用 Linux 特定配置")
         elif system == "windows":
             # Windows 系统配置
             options.add_argument("--disable-gpu")
-            print("🪟 检测到 Windows 系统，应用 Windows 特定配置")
-        else:
-            # macOS 或其他系统
-            print(f"💻 检测到 {system.capitalize()} 系统，应用通用配置")
 
         options.add_argument("--window-size=1920,1080")
         options.add_argument(
@@ -259,8 +237,6 @@ async def async_scrape_enka(uid, character_index=None, headless=True):
             "safebrowsing.enabled": True,
         }
         options.add_experimental_option("prefs", prefs)
-
-        print("🚀 正在启动 Chrome...")
 
         # 根据系统配置 ChromeDriver
         if system == "windows":
@@ -283,11 +259,10 @@ async def async_scrape_enka(uid, character_index=None, headless=True):
                 "/usr/local/bin/google-chrome",
             ]:
                 if os.path.exists(chrome_path):
-                    print(f"✅ 找到 Chrome 二进制文件: {chrome_path}")
                     options.binary_location = chrome_path
                     chrome_found = True
                     break
-            
+
             if not chrome_found:
                 # 如果预设路径都没找到，尝试从 PATH 中查找
                 chrome_in_path = shutil.which("google-chrome") or \
@@ -295,10 +270,9 @@ async def async_scrape_enka(uid, character_index=None, headless=True):
                                  shutil.which("chromium-browser") or \
                                  shutil.which("chromium")
                 if chrome_in_path:
-                    print(f"✅ 从 PATH 中找到 Chrome: {chrome_in_path}")
                     options.binary_location = chrome_in_path
                     chrome_found = True
-            
+
             if not chrome_found:
                 return (False, None, "在 Linux 上未找到可执行的 Chrome 浏览器。\n\n请安装 Chrome:\nsudo yum install -y https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm\n\n安装后请重启 AstrBot。")
 
@@ -317,7 +291,6 @@ async def async_scrape_enka(uid, character_index=None, headless=True):
 
         wait = WebDriverWait(driver, 25)  # 显式等待 25 秒
 
-        print(f"🌐 访问中: {url}")
         driver.get(url)
 
         # === 注入 Cookie 以强制显示中文 ===
@@ -334,37 +307,29 @@ async def async_scrape_enka(uid, character_index=None, headless=True):
                 }
             )
             # 重新访问页面使 cookie 生效
-            print("   ✅ 已设置语言为中文 (zh-cn)，重新加载页面...")
             driver.get(url)
-        except Exception as e:
-            print(f"   ⚠️ 设置 Cookie 失败: {e}")
+        except Exception:
+            pass
 
         # 等待页面核心元素出现
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.avatar")))
-        print(f"✅ 页面加载成功: {driver.title}")
 
         # === 处理角色切换逻辑 ===
         if character_index is not None:
-            print(f"\n--- 正在切换到角色 #{character_index} ---")
             await asyncio.sleep(2)  # 异步等待
             character_list = await async_get_character_list(driver)
 
-            if not character_list:
-                print("⚠️ 未找到可供切换的角色列表")
-            else:
+            if character_list:
                 success = await async_switch_character(
                     driver, character_list, character_index
                 )
                 if not success:
                     error_msg = f"切换到角色 #{character_index} 失败，请检查角色编号是否正确"
-                    print(f"❌ {error_msg}")
                     return (False, None, error_msg)
-            print("--- 角色切换处理完成 ---\n")
 
         # === 按钮点击流程 (针对 Linux 优化) ===
 
         # 步骤 1: 点击"生成图片"按钮
-        print("步骤 1: 查找并点击'生成图片'按钮...")
         try:
             btn_generate = wait.until(
                 EC.element_to_be_clickable(
@@ -372,16 +337,13 @@ async def async_scrape_enka(uid, character_index=None, headless=True):
                 )
             )
             btn_generate.click()
-            print("   ✅ 点击成功")
         except Exception as e:
             error_msg = f"无法点击生成按钮，请检查 UID {uid} 是否有效或网页结构是否已更新: {str(e)}"
-            print(f"   ❌ {error_msg}")
             error_path = os.path.join(screen_dir, f"error_stage1_{uid}.png")
             driver.save_screenshot(error_path)
             return (False, None, error_msg)
 
         # 步骤 2: 等待弹窗并点击最终"下载"
-        print("步骤 2: 等待渲染并点击'下载'按钮...")
 
         # 尝试多个可能的按钮选择器（应对网页更新或不同分辨率）
         selectors = [
@@ -400,7 +362,6 @@ async def async_scrape_enka(uid, character_index=None, headless=True):
                     EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
                 )
                 btn_download.click()
-                print(f"   ✅ 通过 [{selector}] 点击下载成功")
                 success_download_click = True
                 break
             except Exception as e:
@@ -412,11 +373,9 @@ async def async_scrape_enka(uid, character_index=None, headless=True):
             debug_img = os.path.join(screen_dir, f"error_debug_{uid}.png")
             driver.save_screenshot(debug_img)
             error_msg = f"无法定位下载按钮，请检查网页结构是否已更新。已保存调试截图至: {debug_img}。最后错误: {last_error}"
-            print(f"   ❌ {error_msg}")
             return (False, None, error_msg)
 
         # 步骤 3: 确认下载
-        print("步骤 3: 等待文件写入磁盘...")
         await asyncio.sleep(6)  # 异步等待文件写入
 
         # 记录下载前的文件列表（用于对比找出新文件）
@@ -443,20 +402,16 @@ async def async_scrape_enka(uid, character_index=None, headless=True):
             # 验证文件是否是新创建的（60秒内）
             file_age = time.time() - os.path.getmtime(latest_file)
             if file_age < 60:
-                print(f"🎉 任务完成！下载文件: {latest_file}")
                 return (True, latest_file, "")
             else:
                 error_msg = "发现图片文件但都不是最近下载的（可能是旧文件），请检查下载配置"
-                print(f"⚠️ {error_msg}")
                 return (False, None, error_msg)
         else:
             error_msg = "未发现新下载的文件，请检查 screen 文件夹权限或 enka.network 是否正常"
-            print(f"⚠️ {error_msg}")
             return (False, None, error_msg)
 
     except Exception as e:
         error_msg = f"发生异常: {type(e).__name__}: {str(e)}"
-        print(f"🔥 {error_msg}")
         return (False, None, error_msg)
     finally:
         if driver:
@@ -470,7 +425,6 @@ async def async_main():
 
     # 检测系统
     system = platform.system().lower()
-    print(f"📡 当前系统: {platform.system()} {platform.release()}")
 
     uid = input("请输入 UID (默认 269377658): ").strip() or "269377658"
 
@@ -489,14 +443,6 @@ async def async_main():
             input("是否使用无头模式？(y/n，默认 y-隐藏浏览器): ").strip().lower()
         )
         headless = headless_input != "n"
-
-    print("\n📋 配置信息:")
-    print(f"   UID: {uid}")
-    print(
-        f"   角色编号: {character_index if character_index else '不切换（使用默认）'}"
-    )
-    print(f"   无头模式: {'是' if headless else '否'}")
-    print(f"   系统: {system.capitalize()}\n")
 
     result = await async_scrape_enka(
         uid, character_index=character_index, headless=headless
