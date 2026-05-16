@@ -29,12 +29,18 @@ class MyPlugin(Star):
         first_run_flag = plugin_data_path / ".initialized"
         if not first_run_flag.exists():
             await self._on_first_run(plugin_data_path)
-            first_run_flag.touch()
 
     async def _on_first_run(self, plugin_data_path: Path):
         """插件首次运行时执行，仅调用一次。"""
         logger.info(f"[{PLUGIN_NAME}] 首次运行，执行初始化...")
-        await enka_update()
+        try:
+            await enka_update()
+        except Exception as e:
+            logger.error(f"初始化失败：{e}")
+            return
+        logger.info(f"[{PLUGIN_NAME}] 初始化完成")
+        (plugin_data_path / ".initialized").touch()
+
 
     @filter.command("ys")
     async def character_card(self, event: AstrMessageEvent, uid: str = None, character_index: int = None):
