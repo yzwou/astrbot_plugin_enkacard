@@ -29,14 +29,14 @@ pick = {
 }
 
 
-async def update():
+async def enka_update():
     await encbanner.update()
 
-async def test():
+async def enka_test():
     async with encbanner.ENC(uid = "269377658", lang="chs", character_id="10000047") as encard:
         return await encard.creat()
 
-async def card(uid="269377658", avatar_id="10000047", plugin_data_path = Path(get_astrbot_data_path()) / "plugin_data" / PLUGIN_NAME):
+async def enka_card(uid="269377658", avatar_id="10000047", plugin_data_path =Path(get_astrbot_data_path()) / "plugin_data" / PLUGIN_NAME):
     """
     生成单角色卡片图片
 
@@ -60,9 +60,9 @@ async def card(uid="269377658", avatar_id="10000047", plugin_data_path = Path(ge
         try:
             async with encbanner.ENC(uid=uid, character_id=str(avatar_id), lang="chs", pickle=pick) as encard:
                 c = await encard.creat()
-                for d in c.card:
+                for d in c.enka_card:
                     filename = plugin_data_path / f"{uid}_{d.id}.png"
-                    d.card.save(str(filename))
+                    d.enka_card.save(str(filename))
                     return str(filename)
 
                 error_msg = f"未生成任何角色卡片 (uid={uid}, avatar_id={avatar_id})"
@@ -90,7 +90,7 @@ async def card(uid="269377658", avatar_id="10000047", plugin_data_path = Path(ge
     return f"ERROR:{error_msg}"
 
 if __name__ == "__main__":
-    result = asyncio.run(update())
+    result = asyncio.run(enka_update())
     print(result)
 
 # asyncio.run(main())

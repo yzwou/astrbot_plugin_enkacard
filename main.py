@@ -7,7 +7,8 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
-import ysenka
+
+from .ysenka import *
 from .generate_role_list import role_list_img
 
 PLUGIN_NAME = "astrbot_plugin_enkacard"
@@ -33,7 +34,7 @@ class MyPlugin(Star):
     async def _on_first_run(self, plugin_data_path: Path):
         """插件首次运行时执行，仅调用一次。"""
         logger.info(f"[{PLUGIN_NAME}] 首次运行，执行初始化...")
-        await ysenka.update()
+        await enka_update()
 
     @filter.command("ys")
     async def character_card(self, event: AstrMessageEvent, uid: str = None, character_index: int = None):
@@ -97,7 +98,7 @@ class MyPlugin(Star):
             yield event.plain_result(f"正在生成 UID {uid_str} 的角色 {character_index} 卡片...")
 
             # 调用爬虫函数，返回值为 (success, result, error)
-            success, image_path, error = await ysenka.card(uid_str, character_index, plugin_data_path = Path(get_astrbot_data_path()) / "plugin_data" / PLUGIN_NAME)
+            success, image_path, error = await ysenka.enka_card(uid_str, character_index, plugin_data_path =Path(get_astrbot_data_path()) / "plugin_data" / PLUGIN_NAME)
 
             if not success:
                 # 记录详细错误信息到日志
