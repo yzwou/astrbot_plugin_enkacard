@@ -104,13 +104,7 @@ class MyPlugin(Star):
             yield event.plain_result(f"正在生成 UID {uid_str} 的角色 {character_index} 卡片...")
 
             # 调用爬虫函数，返回值为 (success, result, error)
-            success, image_path, error = await enka_card(uid_str, character_index)
-
-            if not success:
-                # 记录详细错误信息到日志
-                logger.error(f"角色卡片生成失败 | UID: {uid_str} | 错误: {error}")
-                yield event.plain_result(f"❌ 角色卡片生成失败: {error}")
-                return
+            image_path = await enka_card(uid_str, character_index)
 
             # 发送图片（使用 image_result 发送本地图片）
             yield event.image_result(image_path)
