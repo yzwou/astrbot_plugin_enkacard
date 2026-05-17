@@ -1,6 +1,6 @@
 # AstrBot 原神角色卡片插件
 
-一个用于 AstrBot 的插件，可以从 [enka.network](https://enka.network/) 获取原神玩家的角色信息并生成角色卡片图片。
+一个用于 AstrBot 的插件，可以从 [enka.network](https://enka.network/) 获取原神玩家的角色信息并使用 [enkacard](https://pypi.org/project/enkacard/) 库生成角色卡片图片。
 
 ## 功能特性
 
@@ -10,13 +10,14 @@
 
 ## 安装
 
-### 可选依赖1：enkacard与字体
+### 必选依赖：enkacard与字体
 
 本插件使用 Enkacard pip库进行角色卡片图片生成，因此需要安装 **Enkacard库及必要文件**。
 
+一般插件初次安装时就会自动安装。手动安装：给机器人发送```/ysupdate```即可
 
-
-### 可选依赖2：Playwright
+### 可选依赖：Playwright
+用于生成图片，若不安装则使用 Astrbot 自带的文转图功能
 ```bash
 pip install playwright
 python -m playwright install
@@ -30,7 +31,14 @@ playwright install
 
 在 AstrBot 插件市场中搜索并找到 **Enkacard** 后安装
 
-### 插件安装2：手动安装
+### 插件安装2：AstrBot 手动安装
+
+1. 打开 AstrBot 插件页面
+2. 点击 ⌈ **+** ⌋ 安装插件
+3. 点击 **从链接安装**
+4. 输入 ```https://github.com/yzwou/astrbot_plugin_enkacard```
+
+### 插件安装3：手动安装
 
 1. 克隆本仓库到 `data/plugins` 文件夹下：
 
@@ -73,24 +81,11 @@ pip install -r requirements.txt
 
 角色编号从 1 开始，对应角色列表中的顺序。
 
-## 依赖项
-
-- `selenium>=4.6.0` - 自动化浏览器操作
-
-## 技术说明
-
-本插件使用 Selenium 完成自动化操作：
-- 自动访问 enka.network网站
-- 模拟用户操作获取角色信息
-- 自动下载角色卡片图片
-
-_注：本插件并没有采用enkacard的PyPI库来获取角色图片_
-
-## 注意事项
-
-1. **响应时间**：由于需要浏览器操作，可能需要 10-30 秒
-2. **图片保存位置**：插件目录下的 `screen/` 文件夹
+## 其他
+**图片保存位置**：插件数据目录 *data/plugin_data/astrbot_plguin_enkacard*
 
 
 - [enka.network](https://enka.network/)
+- [enkacard](https://pypi.org/project/enkacard/)
 - [AstrBot](https://github.com/AstrBotDevs/AstrBot)
+

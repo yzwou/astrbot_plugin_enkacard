@@ -40,7 +40,7 @@ async def enka_card(uid="269377658", idx = "10000047"):
     生成单角色卡片图片
 
     :param uid: 玩家UID
-    :param avatar_id: 角色ID
+    :param idx: 角色编号
     :return: 成功时返回图片绝对路径字符串，失败时返回错误信息字符串（以"ERROR:"开头）
     """
     try:

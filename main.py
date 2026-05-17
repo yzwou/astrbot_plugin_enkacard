@@ -11,19 +11,17 @@ from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 from .ysenka import *
 from .generate_role_list import role_list_img
 
-PLUGIN_NAME = "astrbot_plugin_enkacard"
-
-
 @register("astrbot_plugin_enkacard", "yzwou", "获取指定原神玩家信息的插件", "1.0.0")
 class MyPlugin(Star):
     def __init__(self, context: Context, config):
         super().__init__(context)
         self.config = config
         self.enable_local = self.config.get("enable_local", False)
+        self.PLUGIN_NAME = "astrbot_plugin_enkacard"
 
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
-        plugin_data_path = Path(get_astrbot_data_path()) / "plugin_data" / PLUGIN_NAME
+        plugin_data_path = Path(get_astrbot_data_path()) / "plugin_data" / self.PLUGIN_NAME
         plugin_data_path.mkdir(parents=True, exist_ok=True)
 
         first_run_flag = plugin_data_path / ".initialized"
@@ -32,14 +30,29 @@ class MyPlugin(Star):
 
     async def _on_first_run(self, plugin_data_path: Path):
         """插件首次运行时执行，仅调用一次。"""
-        logger.info(f"{PLUGIN_NAME} 首次运行，执行初始化...")
+        logger.info(f"{self.PLUGIN_NAME} 首次运行，执行初始化...")
         try:
             await enka_update()
         except Exception as e:
             logger.error(f"初始化失败：{e}")
             return
-        logger.info(f"{PLUGIN_NAME} 初始化完成")
+        logger.info(f"{self.PLUGIN_NAME} 初始化完成")
         (plugin_data_path / ".initialized").touch()
+
+    @filter.command("ysupdate")
+    async def ysupdate(self, event: AstrMessageEvent):
+        """手动触发 enka 数据更新。"""
+        plugin_data_path = Path(get_astrbot_data_path()) / "plugin_data" / self.PLUGIN_NAME
+        yield event.plain_result("正在更新 enka 数据...")
+        try:
+            await enka_update()
+        except Exception as e:
+            logger.error(f"更新失败：{e}")
+            yield event.plain_result(f"❌ 更新失败：{e}")
+            return
+        (plugin_data_path / ".initialized").touch()
+        yield event.plain_result("✅ 更新完成")
+
 
 
     @filter.command("ys")
