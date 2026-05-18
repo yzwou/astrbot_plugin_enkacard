@@ -21,7 +21,7 @@ class MyPlugin(Star):
     def __init__(self, context: Context, config):
         super().__init__(context)
         self.config = config
-        self.enable_local = self.config.get("enable_local", False)
+        self.enable_local_blender = self.config.get("enable_local_blender", False)
         self.enable_local_card = self.config.get("enable_local_card", True)
         self.PLUGIN_NAME = "astrbot_plugin_enkacard"
 
@@ -70,7 +70,7 @@ class MyPlugin(Star):
 
         if character_index is None:
             try:
-                if not self.enable_local:
+                if not self.enable_local_blender:
                     html_file_path = await role_list_img(uid, False)
 
                     # 检查是否返回错误信息

@@ -1,5 +1,5 @@
 {
-  "enable_local": {
+  "enable_local_blender": {
     "description": "启用本地图片渲染",
     "type": "bool",
     "default": false,
