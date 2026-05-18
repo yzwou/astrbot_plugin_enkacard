@@ -4,5 +4,11 @@
     "type": "bool",
     "default": false,
     "hint": "启用后，将使用本地的 Playwright 渲染 html 页面，否则使用Astrbot的API渲染（本地效果更好）"
+  },
+  "enable_local_card": {
+    "description": "启用本地角色卡片生成",
+    "type": "bool",
+    "default": true,
+    "hint": "启用后，使用本地 enkacard 库生成单角色卡片；关闭后，调用阿里云函数生成卡片（云端速度更快但效果取决于服务端）"
   }
 }

@@ -2,6 +2,8 @@ import asyncio
 import os
 from pathlib import Path
 
+import aiohttp
+
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
@@ -10,6 +12,9 @@ from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 from .ysenka import *
 from .generate_role_list import role_list_img
+from .make_enka import list_roles_dict
+
+ENKA_CARD_API_URL = "https://enkacard-spider-nuulvlmavw.ap-southeast-1.fcapp.run"
 
 @register("astrbot_plugin_enkacard", "yzwou", "获取指定原神玩家信息的插件", "1.0.0")
 class MyPlugin(Star):
@@ -17,6 +22,7 @@ class MyPlugin(Star):
         super().__init__(context)
         self.config = config
         self.enable_local = self.config.get("enable_local", False)
+        self.enable_local_card = self.config.get("enable_local_card", True)
         self.PLUGIN_NAME = "astrbot_plugin_enkacard"
 
     async def initialize(self):
@@ -116,11 +122,68 @@ class MyPlugin(Star):
 
             yield event.plain_result(f"正在生成 UID {uid_str} 的角色 {character_index} 卡片...")
 
-            # 调用爬虫函数，返回值为 (success, result, error)
-            image_path = await enka_card(uid_str, character_index)
+            if self.enable_local_card:
+                # 调用本地 enkacard 生成
+                image_path = await enka_card(uid_str, character_index)
 
-            # 发送图片（使用 image_result 发送本地图片）
-            yield event.image_result(image_path)
+                if isinstance(image_path, str) and image_path.startswith("ERROR:"):
+                    error_msg = image_path[6:]
+                    logger.error(f"角色卡片生成失败 | UID: {uid_str} | 错误: {error_msg}")
+                    yield event.plain_result(f"❌ {error_msg}")
+                    return
+
+                yield event.image_result(image_path)
+            else:
+                # 调用阿里云函数生成
+                try:
+                    roles = await list_roles_dict(uid_str)
+                except ValueError as e:
+                    logger.error(f"获取角色列表失败 | UID: {uid_str} | 错误: {str(e)}")
+                    yield event.plain_result(f"❌ 获取角色列表失败: {str(e)}")
+                    return
+
+                if not roles or character_index < 1 or character_index > len(roles):
+                    yield event.plain_result(
+                        f"❌ 角色编号无效，请在 1-{len(roles)} 范围内选择"
+                    )
+                    return
+
+                avatar_id = str(roles[character_index - 1]["id"])
+
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.post(
+                            ENKA_CARD_API_URL,
+                            json={"uid": uid_str, "avatar_id": avatar_id},
+                            timeout=aiohttp.ClientTimeout(total=60),
+                        ) as resp:
+                            if resp.status != 200:
+                                err = f"云端服务返回 HTTP {resp.status}"
+                                logger.error(f"云端卡片生成失败 | UID: {uid_str} | {err}")
+                                yield event.plain_result(f"❌ {err}")
+                                return
+                            data = await resp.json()
+                except Exception as e:
+                    logger.error(
+                        f"云端卡片生成请求异常 | UID: {uid_str} | 错误: {str(e)}",
+                        exc_info=True,
+                    )
+                    yield event.plain_result(f"❌ 云端卡片生成请求异常: {str(e)}")
+                    return
+
+                if not data.get("success"):
+                    err = data.get("error") or data.get("message") or "未知错误"
+                    logger.error(f"云端卡片生成失败 | UID: {uid_str} | 错误: {err}")
+                    yield event.plain_result(f"❌ 云端卡片生成失败: {err}")
+                    return
+
+                image_url = data.get("url")
+                if not image_url:
+                    yield event.plain_result("❌ 云端返回结果中缺少图片链接")
+                    return
+
+                logger.info(f"使用云端生成卡片成功 | UID: {uid_str} | URL: {image_url}")
+                yield event.image_result(image_url)
 
 
     async def terminate(self):
