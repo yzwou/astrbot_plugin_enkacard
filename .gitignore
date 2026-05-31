@@ -205,3 +205,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Deprecated files
+弃用*
+
+# Runtime artifacts
+screen/*.png
+data/temp/
+data/cmd_config.json
+data/t2i_templates/
