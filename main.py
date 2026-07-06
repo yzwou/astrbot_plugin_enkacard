@@ -26,6 +26,7 @@ class MyPlugin(Star):
         self.enable_local_blender = self.config.get("enable_local_blender", False)
         self.enable_local_card = self.config.get("enable_local_card", True)
         self.PLUGIN_NAME = "astrbot_plugin_enkacard"
+        self.context.add_llm_tools(kapian())
 
     async def initialize(self):
         """可选择实现异步的插件初始化方法，当实例化该插件类之后会自动调用该方法。"""
