@@ -14,6 +14,8 @@ from .ysenka import *
 from .generate_role_list import role_list_img
 from .make_enka import list_roles_dict
 
+from .tools.kapian import kapian
+
 ENKA_CARD_API_URL = "https://enkacard-spider-nuulvlmavw.ap-southeast-1.fcapp.run"
 
 @register("astrbot_plugin_enkacard", "yzwou", "获取指定原神玩家信息的插件", "1.0.0")
