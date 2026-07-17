@@ -12,7 +12,6 @@ from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 from .ysenka import *
 from .generate_role_list import role_list_img
-from .make_enka import list_roles_dict
 
 from .tools.kapian import kapian
 
@@ -65,13 +64,17 @@ class MyPlugin(Star):
 
 
     @filter.command("ys")
-    async def character_card(self, event: AstrMessageEvent, uid: str = None, character_index: int = None):
-        """获取原神角色卡片图片。用法: /ys [uid] [角色编号（选填）]"""
+    async def character_card(self, event: AstrMessageEvent, uid: str = None, character: str = None):
+        """获取原神角色卡片图片。用法: /ys [uid] [角色序号或角色名（选填）]"""
         if not uid:
-            yield event.plain_result("用法: /ys [uid] [角色编号（选填）]\n示例: /ys 269377658 1")
+            yield event.plain_result(
+                "用法: /ys [uid] [角色序号或角色名（选填）]\n"
+                "示例: /ys 269377658 1\n"
+                "示例: /ys 269377658 枫原万叶"
+            )
             return
 
-        if character_index is None:
+        if character is None:
             try:
                 if not self.enable_local_blender:
                     html_file_path = await role_list_img(uid, False)
@@ -123,11 +126,23 @@ class MyPlugin(Star):
             # 转换 uid 为字符串
             uid_str = str(uid)
 
-            yield event.plain_result(f"正在生成 UID {uid_str} 的角色 {character_index} 卡片...")
+            try:
+                character_index, role = await resolve_character(uid_str, character)
+            except ValueError as e:
+                logger.error(f"角色解析失败 | UID: {uid_str} | 选择器: {character} | 错误: {str(e)}")
+                yield event.plain_result(f"❌ {str(e)}")
+                return
+
+            avatar_id = str(role["id"])
+            character_name = role["name"]
+            yield event.plain_result(
+                f"正在生成 UID {uid_str} 的角色 {character_name} "
+                f"（序号 {character_index}）卡片..."
+            )
 
             if self.enable_local_card:
                 # 调用本地 enkacard 生成
-                image_path = await enka_card(uid_str, character_index)
+                image_path = await enka_card(uid_str, character_index, avatar_id=avatar_id)
 
                 if isinstance(image_path, str) and image_path.startswith("ERROR:"):
                     error_msg = image_path[6:]
@@ -138,21 +153,6 @@ class MyPlugin(Star):
                 yield event.image_result(image_path)
             else:
                 # 调用阿里云函数生成
-                try:
-                    roles = await list_roles_dict(uid_str)
-                except ValueError as e:
-                    logger.error(f"获取角色列表失败 | UID: {uid_str} | 错误: {str(e)}")
-                    yield event.plain_result(f"❌ 获取角色列表失败: {str(e)}")
-                    return
-
-                if not roles or character_index < 1 or character_index > len(roles):
-                    yield event.plain_result(
-                        f"❌ 角色编号无效，请在 1-{len(roles)} 范围内选择"
-                    )
-                    return
-
-                avatar_id = str(roles[character_index - 1]["id"])
-
                 try:
                     async with aiohttp.ClientSession() as session:
                         async with session.post(

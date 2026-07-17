@@ -35,12 +35,45 @@ async def enka_test():
     async with encbanner.ENC(uid = "269377658", lang="chs", character_id="10000047") as encard:
         return await encard.creat()
 
-async def enka_card(uid="269377658", idx = "10000047"):
+async def resolve_character(uid, selector):
+    """根据角色列表序号或角色名解析 UID 当前展示的角色。"""
+    roles = await list_roles_dict(str(uid))
+    if not roles:
+        raise ValueError(f"UID {uid} 没有公开展示角色")
+
+    selector_text = str(selector).strip()
+    if not selector_text:
+        raise ValueError("角色序号或角色名不能为空")
+
+    if selector_text.isdecimal():
+        character_index = int(selector_text)
+        if character_index < 1 or character_index > len(roles):
+            raise ValueError(f"角色编号无效，请在 1-{len(roles)} 范围内选择")
+        return character_index, roles[character_index - 1]
+
+    # avatar_names.json 里可能有同名角色（例如不同元素的旅行者），
+    # 因此先得到全部匹配 ID，再到该 UID 的实际展示列表中查找。
+    matched_avatar_ids = {
+        avatar_id for avatar_id, name in idAvatarMap.items()
+        if name == selector_text
+    }
+    if not matched_avatar_ids:
+        raise ValueError(f"未找到角色“{selector_text}”，请检查角色名是否正确")
+
+    for character_index, role in enumerate(roles, start=1):
+        if int(role["id"]) in matched_avatar_ids:
+            return character_index, role
+
+    raise ValueError(f"UID {uid} 的公开展示角色中没有“{selector_text}”")
+
+
+async def enka_card(uid="269377658", idx="1", avatar_id=None):
     """
     生成单角色卡片图片
 
     :param uid: 玩家UID
-    :param idx: 角色编号
+    :param idx: 角色列表序号或角色名
+    :param avatar_id: 已解析的角色 ID；传入时不再重复请求角色列表
     :return: 成功时返回图片绝对路径字符串，失败时返回错误信息字符串（以"ERROR:"开头）
     """
     try:
@@ -55,7 +88,12 @@ async def enka_card(uid="269377658", idx = "10000047"):
     retry_delay = 2  # 秒
     last_error = None
 
-    avatar_id = (await list_roles_dict(uid))[int(idx)-1]["id"]
+    if avatar_id is None:
+        try:
+            _, role = await resolve_character(uid, idx)
+            avatar_id = role["id"]
+        except ValueError as e:
+            return f"ERROR:{str(e)}"
 
     for attempt in range(1, max_retries + 1):
         try:

@@ -1,5 +1,6 @@
 import os
 import time
+from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 import json
@@ -16,8 +17,7 @@ async def html_to_image(html_file_path: str, screenshot_path: str) -> str:
     :param screenshot_path: 截图保存路径
     :return: 截图文件路径
     """
-    # 转换为 file:// URL
-    file_url = f'file://{html_file_path.replace(os.sep, "/")}'
+    file_url = Path(html_file_path).as_uri()
 
     async with async_playwright() as p:
         # 启动浏览器（使用 headless=False 可以看到渲染过程）
