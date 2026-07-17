@@ -10,5 +10,11 @@
     "type": "bool",
     "default": true,
     "hint": "启用后，使用本地 enkacard 库生成单角色卡片；关闭后，调用 阿里云API 生成卡片（可能不稳定）"
+  },
+  "enable_llm_character_alias": {
+    "description": "启用 LLM 识别角色简称",
+    "type": "bool",
+    "default": true,
+    "hint": "本地无法识别角色简称时，调用当前会话使用的聊天模型，从该 UID 的公开展示角色中选择匹配项"
   }
 }

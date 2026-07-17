@@ -17,6 +17,28 @@ from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 PLUGIN_NAME = "astrbot_plugin_enkacard"
 
+# 无需调用 LLM 即可稳定识别的常用称呼。
+CHARACTER_ALIASES = {
+    "万叶": "枫原万叶",
+    "叶天帝": "枫原万叶",
+    "雷神": "雷电将军",
+    "影": "雷电将军",
+    "风神": "温迪",
+    "岩神": "钟离",
+    "草神": "纳西妲",
+    "小草神": "纳西妲",
+    "水神": "芙宁娜",
+    "芙芙": "芙宁娜",
+    "火神": "玛薇卡",
+    "公子": "达达利亚",
+    "散兵": "流浪者",
+    "国崩": "流浪者",
+    "仆人": "阿蕾奇诺",
+    "龙王": "那维莱特",
+    "水龙王": "那维莱特",
+    "海哥": "艾尔海森",
+}
+
 idEnergyMap = { 1: "火", 2: "水", 3: "草", 4: "雷", 5: "冰", 6: "岩", 7: "风" }
 
 pick = {
@@ -35,7 +57,7 @@ async def enka_test():
     async with encbanner.ENC(uid = "269377658", lang="chs", character_id="10000047") as encard:
         return await encard.creat()
 
-async def resolve_character(uid, selector):
+async def resolve_character(uid, selector, alias_resolver=None):
     """根据角色列表序号或角色名解析 UID 当前展示的角色。"""
     roles = await list_roles_dict(str(uid))
     if not roles:
@@ -51,20 +73,41 @@ async def resolve_character(uid, selector):
             raise ValueError(f"角色编号无效，请在 1-{len(roles)} 范围内选择")
         return character_index, roles[character_index - 1]
 
+    canonical_name = CHARACTER_ALIASES.get(selector_text, selector_text)
+
     # avatar_names.json 里可能有同名角色（例如不同元素的旅行者），
     # 因此先得到全部匹配 ID，再到该 UID 的实际展示列表中查找。
     matched_avatar_ids = {
         avatar_id for avatar_id, name in idAvatarMap.items()
-        if name == selector_text
+        if name == canonical_name
     }
-    if not matched_avatar_ids:
-        raise ValueError(f"未找到角色“{selector_text}”，请检查角色名是否正确")
 
     for character_index, role in enumerate(roles, start=1):
         if int(role["id"]) in matched_avatar_ids:
             return character_index, role
 
-    raise ValueError(f"UID {uid} 的公开展示角色中没有“{selector_text}”")
+    if matched_avatar_ids:
+        raise ValueError(f"UID {uid} 的公开展示角色中没有“{canonical_name}”")
+
+    # 对“绫华”“心海”这种全名中的唯一片段直接本地匹配。
+    if len(selector_text) >= 2:
+        partial_matches = [
+            (character_index, role)
+            for character_index, role in enumerate(roles, start=1)
+            if selector_text in role["name"]
+        ]
+        if len(partial_matches) == 1:
+            return partial_matches[0]
+
+    # 更自由的简称交给调用方提供的 LLM 解析器处理。
+    if alias_resolver is not None:
+        resolved_avatar_id = await alias_resolver(selector_text, roles)
+        if resolved_avatar_id is not None:
+            for character_index, role in enumerate(roles, start=1):
+                if str(role["id"]) == str(resolved_avatar_id):
+                    return character_index, role
+
+    raise ValueError(f"未找到角色“{selector_text}”，请检查角色名或该角色是否已公开展示")
 
 
 async def enka_card(uid="269377658", idx="1", avatar_id=None):
