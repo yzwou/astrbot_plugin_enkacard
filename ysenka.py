@@ -12,12 +12,14 @@ if plugin_dir not in sys.path:
 from enkacard import encbanner
 from .make_enka import *
 import asyncio
+import aiohttp
 
 from astrbot.api import logger
 from pathlib import Path
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 
 PLUGIN_NAME = "astrbot_plugin_enkacard"
+ENKA_CARD_API_URL = "https://enkacard-spider-nuulvlmavw.ap-southeast-1.fcapp.run"
 
 # 无需调用 LLM 即可稳定识别的常用称呼。
 CHARACTER_ALIASES = {
@@ -58,6 +60,31 @@ async def enka_update():
 async def enka_test():
     async with encbanner.ENC(uid = "269377658", lang="chs", character_id="10000047") as encard:
         return await encard.creat()
+
+
+async def enka_card_cloud(uid, avatar_id):
+    """调用云端服务生成角色卡片，返回图片 URL 或以 ERROR: 开头的错误。"""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                ENKA_CARD_API_URL,
+                json={"uid": str(uid), "avatar_id": str(avatar_id)},
+                timeout=aiohttp.ClientTimeout(total=60),
+            ) as resp:
+                if resp.status != 200:
+                    return f"ERROR:云端服务返回 HTTP {resp.status}"
+                data = await resp.json()
+    except Exception as e:
+        return f"ERROR:云端卡片生成请求异常: {str(e)}"
+
+    if not data.get("success"):
+        error = data.get("error") or data.get("message") or "未知错误"
+        return f"ERROR:云端卡片生成失败: {error}"
+
+    image_url = data.get("url")
+    if not image_url:
+        return "ERROR:云端返回结果中缺少图片链接"
+    return image_url
 
 
 async def resolve_character_alias_with_llm(context, event, selector, roles):

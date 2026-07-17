@@ -10,6 +10,7 @@ from typing import Optional
 from ..make_enka import list_roles_dict
 from ..ysenka import (
     enka_card,
+    enka_card_cloud,
     resolve_character,
     resolve_character_alias_with_llm,
 )
@@ -18,10 +19,11 @@ from ..ysenka import (
 @dataclass
 class kapian(FunctionTool):
     enable_llm_character_alias: bool = True
+    enable_local_card: bool = True
     name: str = "genshin_card"
     description: str = (
         "获取原神玩家角色信息或生成角色卡片。传入 UID 查询角色列表（含角色名、元素、等级）；"
-        "也可指定 character，使用角色列表序号、完整名称或简称生成对应角色的详细卡片。"
+        "也可指定 character，使用角色列表序号、完整名称或简称生成并直接发送对应角色卡片。"
     )
     parameters: dict = Field(
         default_factory=lambda: {
@@ -66,13 +68,14 @@ class kapian(FunctionTool):
             return f"UID {uid} 的角色列表：\n" + "\n".join(lines)
         else:
             try:
+                try:
+                    astr_context = context.context.context
+                    event = context.context.event
+                except AttributeError:
+                    return "无法取得当前消息事件，暂时不能发送角色卡片。"
+
                 async def llm_alias_resolver(selector_text, roles):
                     if not self.enable_llm_character_alias:
-                        return None
-                    try:
-                        astr_context = context.context.context
-                        event = context.context.event
-                    except AttributeError:
                         return None
                     return await resolve_character_alias_with_llm(
                         astr_context,
@@ -86,18 +89,35 @@ class kapian(FunctionTool):
                     character_selector,
                     alias_resolver=llm_alias_resolver,
                 )
-                image_path = await enka_card(
-                    str(uid),
-                    character_index,
-                    avatar_id=role["id"],
+                await event.send(
+                    event.plain_result(
+                        f"正在生成 UID {uid} 的角色 {role['name']} "
+                        f"（序号 {character_index}）卡片..."
+                    )
                 )
+
+                if self.enable_local_card:
+                    image_result = await enka_card(
+                        str(uid),
+                        character_index,
+                        avatar_id=role["id"],
+                    )
+                else:
+                    image_result = await enka_card_cloud(str(uid), role["id"])
             except ValueError as e:
                 return f"无法识别角色：{e}"
             except Exception as e:
                 return f"生成卡片时发生错误：{e}"
-            if isinstance(image_path, str) and image_path.startswith("ERROR:"):
-                return f"生成卡片失败：{image_path[6:]}"
+
+            if isinstance(image_result, str) and image_result.startswith("ERROR:"):
+                return f"生成卡片失败：{image_result[6:]}"
+
+            try:
+                await event.send(event.image_result(image_result))
+            except Exception as e:
+                return f"卡片已生成，但直接发送图片失败：{str(e)}"
+
             return (
-                f"已成功生成 UID {uid} 的角色 {role['name']}"
-                f"（序号 {character_index}）卡片，图片路径：{image_path}"
+                f"UID {uid} 的角色 {role['name']}（序号 {character_index}）卡片"
+                "已直接发送给用户，无需再调用 send_message_to_user。"
             )

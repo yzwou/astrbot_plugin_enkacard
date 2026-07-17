@@ -27,7 +27,10 @@ class MyPlugin(Star):
         self.enable_llm_character_alias = self.config.get("enable_llm_character_alias", True)
         self.PLUGIN_NAME = "astrbot_plugin_enkacard"
         self.context.add_llm_tools(
-            kapian(enable_llm_character_alias=self.enable_llm_character_alias)
+            kapian(
+                enable_llm_character_alias=self.enable_llm_character_alias,
+                enable_local_card=self.enable_local_card,
+            )
         )
 
     async def _resolve_character_alias_with_llm(self, event, selector, roles):
