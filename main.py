@@ -13,6 +13,7 @@ from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 from .ysenka import *
 from .generate_role_list import role_list_img
 
+from .tools.getinfo import getinfo
 from .tools.kapian import kapian
 
 ENKA_CARD_API_URL = "https://enkacard-spider-nuulvlmavw.ap-southeast-1.fcapp.run"
@@ -30,7 +31,10 @@ class MyPlugin(Star):
             kapian(
                 enable_llm_character_alias=self.enable_llm_character_alias,
                 enable_local_card=self.enable_local_card,
-            )
+            ),
+            getinfo(
+                enable_llm_character_alias=self.enable_llm_character_alias,
+            ),
         )
 
     async def _resolve_character_alias_with_llm(self, event, selector, roles):

@@ -134,6 +134,67 @@ async def resolve_character_alias_with_llm(context, event, selector, roles):
     return avatar_id
 
 
+def get_character_catalog():
+    """返回本地角色目录，不进行网络请求。"""
+    return [
+        {"id": avatar_id, "name": name}
+        for avatar_id, name in idAvatarMap.items()
+    ]
+
+
+async def resolve_character_avatar_ids(
+    selector,
+    alias_resolver=None,
+    llm_roles=None,
+):
+    """将角色 ID、完整名、简称或唯一姓名片段解析为候选 avatarId。"""
+    selector_text = str(selector).strip()
+    if not selector_text:
+        raise ValueError("角色名称或 avatarId 不能为空")
+
+    # getinfo 工具允许直接传入 avatarId；即使本地资源尚未更新，也保留该 ID。
+    if re.fullmatch(r"\d{8}", selector_text):
+        return {int(selector_text)}
+    if selector_text.isdecimal():
+        raise ValueError("数字角色参数必须是 8 位 avatarId，不支持展柜序号")
+
+    catalog = get_character_catalog()
+    canonical_name = CHARACTER_ALIASES.get(selector_text, selector_text)
+
+    exact_ids = {
+        int(role["id"])
+        for role in catalog
+        if role["name"] == canonical_name
+    }
+    if exact_ids:
+        return exact_ids
+
+    # 同名角色（例如不同元素的旅行者）算同一个名称候选，保留其全部 ID。
+    if len(selector_text) >= 2:
+        partial_names = {
+            role["name"]
+            for role in catalog
+            if selector_text in role["name"]
+        }
+        if len(partial_names) == 1:
+            matched_name = partial_names.pop()
+            return {
+                int(role["id"])
+                for role in catalog
+                if role["name"] == matched_name
+            }
+
+    if alias_resolver is not None:
+        resolver_roles = llm_roles if llm_roles is not None else catalog
+        resolved_avatar_id = await alias_resolver(selector_text, resolver_roles)
+        if resolved_avatar_id is not None:
+            valid_ids = {str(role["id"]) for role in resolver_roles}
+            if str(resolved_avatar_id) in valid_ids:
+                return {int(resolved_avatar_id)}
+
+    raise ValueError(f"未找到角色“{selector_text}”，请检查角色名或简称")
+
+
 async def resolve_character(uid, selector, alias_resolver=None):
     """根据角色列表序号或角色名解析 UID 当前展示的角色。"""
     roles = await list_roles_dict(str(uid))
@@ -150,41 +211,18 @@ async def resolve_character(uid, selector, alias_resolver=None):
             raise ValueError(f"角色编号无效，请在 1-{len(roles)} 范围内选择")
         return character_index, roles[character_index - 1]
 
-    canonical_name = CHARACTER_ALIASES.get(selector_text, selector_text)
-
-    # avatar_names.json 里可能有同名角色（例如不同元素的旅行者），
-    # 因此先得到全部匹配 ID，再到该 UID 的实际展示列表中查找。
-    matched_avatar_ids = {
-        avatar_id for avatar_id, name in idAvatarMap.items()
-        if name == canonical_name
-    }
+    matched_avatar_ids = await resolve_character_avatar_ids(
+        selector_text,
+        alias_resolver=alias_resolver,
+        llm_roles=roles,
+    )
 
     for character_index, role in enumerate(roles, start=1):
         if int(role["id"]) in matched_avatar_ids:
             return character_index, role
 
-    if matched_avatar_ids:
-        raise ValueError(f"UID {uid} 的公开展示角色中没有“{canonical_name}”")
-
-    # 对“绫华”“心海”这种全名中的唯一片段直接本地匹配。
-    if len(selector_text) >= 2:
-        partial_matches = [
-            (character_index, role)
-            for character_index, role in enumerate(roles, start=1)
-            if selector_text in role["name"]
-        ]
-        if len(partial_matches) == 1:
-            return partial_matches[0]
-
-    # 更自由的简称交给调用方提供的 LLM 解析器处理。
-    if alias_resolver is not None:
-        resolved_avatar_id = await alias_resolver(selector_text, roles)
-        if resolved_avatar_id is not None:
-            for character_index, role in enumerate(roles, start=1):
-                if str(role["id"]) == str(resolved_avatar_id):
-                    return character_index, role
-
-    raise ValueError(f"未找到角色“{selector_text}”，请检查角色名或该角色是否已公开展示")
+    canonical_name = CHARACTER_ALIASES.get(selector_text, selector_text)
+    raise ValueError(f"UID {uid} 的公开展示角色中没有“{canonical_name}”")
 
 
 async def enka_card(uid="269377658", idx="1", avatar_id=None):
