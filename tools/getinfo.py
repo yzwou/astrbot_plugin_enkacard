@@ -549,9 +549,11 @@ class getinfo(FunctionTool):
     enable_llm_character_alias: bool = True
     name: str = "genshin_character_info"
     description: str = (
-        "当AI需要了解原神玩家单个或全部角色的详细配装信息时调用，返回 JSON。"
+        "仅当用户明确询问原神角色的文字数据、配装详情、武器、圣遗物、命座、天赋、"
+        "属性数值或配装分析时调用，返回 JSON。不要用于生成或发送角色卡片图片。"
+        "如果用户只是说‘看一下’或‘查看’某 UID 的某角色，且没有询问具体数值或配装分析，"
+        "应调用 genshin_card。"
         "character 可传完整中文名、简称或 8 位 avatarId；不传时返回全部公开角色。"
-        "若用户只是需要获取角色信息，应使用genshin_card函数工具；若用户需要对其进行评价，则可用此工具来获取可读的信息"
     )
     parameters: dict = Field(
         default_factory=lambda: {

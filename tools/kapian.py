@@ -22,8 +22,13 @@ class kapian(FunctionTool):
     enable_local_card: bool = True
     name: str = "genshin_card"
     description: str = (
-        "当用户想要获取/了解原神玩家指定角色的信息时调用，从而生成角色卡片。传入 UID 查询角色列表（含角色名、元素、等级）；"
-        "也可指定 character，使用角色列表序号、完整名称或简称生成并直接发送对应角色卡片。"
+        "当用户想要查看、生成、发送原神角色卡片图片或角色面板图片时调用。"
+        "例如：‘看一下原神269377658的万叶’、‘查看原神269377658的万叶’、"
+        "‘发我这个 UID 的万叶面板’或‘生成万叶角色卡片’。"
+        "指定角色后，本工具会直接发送对应的角色卡片图片。"
+        "如果用户明确询问配装数值、武器、圣遗物、命座或属性分析，才调用 genshin_character_info。"
+        "仅传入 UID 时查询角色列表（含角色名、元素、等级）；"
+        "character 可使用角色序号、完整名称或简称。"
     )
     parameters: dict = Field(
         default_factory=lambda: {
