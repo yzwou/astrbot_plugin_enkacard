@@ -22,7 +22,7 @@ class kapian(FunctionTool):
     enable_local_card: bool = True
     name: str = "genshin_card"
     description: str = (
-        "当用户想要获取原神玩家角色信息时调用来生成角色卡片，传入 UID 查询角色列表（含角色名、元素、等级）；"
+        "当用户想要获取/了解原神玩家指定角色的信息时调用，从而生成角色卡片。传入 UID 查询角色列表（含角色名、元素、等级）；"
         "也可指定 character，使用角色列表序号、完整名称或简称生成并直接发送对应角色卡片。"
     )
     parameters: dict = Field(

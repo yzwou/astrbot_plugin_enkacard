@@ -549,8 +549,9 @@ class getinfo(FunctionTool):
     enable_llm_character_alias: bool = True
     name: str = "genshin_character_info"
     description: str = (
-        "当AI需要了解原神玩家单个或全部角色的详细配装信息时调用，返回 JSON；"
+        "当AI需要了解原神玩家单个或全部角色的详细配装信息时调用，返回 JSON。"
         "character 可传完整中文名、简称或 8 位 avatarId；不传时返回全部公开角色。"
+        "若用户只是需要获取角色信息，应使用genshin_card函数工具；若用户需要对其进行评价，则可用此工具来获取可读的信息"
     )
     parameters: dict = Field(
         default_factory=lambda: {
